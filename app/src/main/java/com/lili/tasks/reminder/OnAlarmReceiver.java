@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.lili.tasks.TaskProvider;
+import com.lili.tasks.data.TaskProvider;
 
 /**
  * Created by Lili on 22.3.2015 г..

@@ -1,10 +1,14 @@
 package com.lili.tasks;
 
-import android.net.Uri;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
+
+import com.lili.tasks.data.TaskProvider;
 
 
 public class TaskEditActivity extends ActionBarActivity
@@ -34,7 +38,41 @@ public class TaskEditActivity extends ActionBarActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onBackPressed() {
+        showConfirmClosingDialog();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                showConfirmClosingDialog();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void showConfirmClosingDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Are you sure?")
+                .setMessage("Do you want to go back without saving?")
+                .setCancelable(false)
+                .setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                TaskEditActivity.this.finish();
+                            }
+                        })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                }).create().show();
+    }
+
+    @Override
+    public void onFinishEditing() {
+        finish();
+    }
 }

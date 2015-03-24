@@ -2,7 +2,7 @@ package com.lili.tasks.reminder;
 
 import android.content.Intent;
 
-import com.lili.tasks.TaskProvider;
+import com.lili.tasks.data.TaskProvider;
 
 /**
  * Created by Lili on 22.3.2015 г..

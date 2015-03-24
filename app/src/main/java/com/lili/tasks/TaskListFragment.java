@@ -21,6 +21,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lili.tasks.data.TaskProvider;
+
 
 /**
  * A fragment representing a list of Items.
@@ -97,7 +99,7 @@ public class TaskListFragment extends Fragment
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater mi = getActivity().getMenuInflater();
-        mi.inflate(R.menu.menu_task_list_longpress, menu);
+        mi.inflate(R.menu.menu_task_edit, menu);
     }
 
     @Override
@@ -107,12 +109,12 @@ public class TaskListFragment extends Fragment
                 // Delete the task
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                         .getMenuInfo();
+
                 getActivity().getContentResolver().delete(
                         ContentUris.withAppendedId(TaskProvider.CONTENT_URI,
                                 info.id), null, null);
 
-                Toast.makeText(getActivity(),
-                        "Task deleted",
+                Toast.makeText(getActivity(), R.string.toast_task_deleted,
                         Toast.LENGTH_SHORT).show();
                 return true;
         }
@@ -141,7 +143,7 @@ public class TaskListFragment extends Fragment
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(id);
+            mListener.onListItemClick(id);
         }
     }
 
@@ -182,13 +184,9 @@ public class TaskListFragment extends Fragment
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Long id);
+        public void onListItemClick(long id);
     }
 
 }

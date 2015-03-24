@@ -5,12 +5,20 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,8 +27,11 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.lili.tasks.data.TaskProvider;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 
 /**
@@ -30,7 +41,7 @@ import java.util.Calendar;
  * to handle interaction events.
  */
 public class TaskEditFragment extends Fragment implements
-        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String DEFAULT_EDIT_FRAGMENT_TAG = "editFragmentTag";
     //
@@ -44,6 +55,7 @@ public class TaskEditFragment extends Fragment implements
     static final String CALENDAR = "calendar";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String TIME_FORMAT = "kk:mm";
+
     private Calendar mCalendar;
     private EditText mTitleText;
     private EditText mBodyText;
@@ -51,6 +63,7 @@ public class TaskEditFragment extends Fragment implements
     private Button mTimeButton;
     private Button mConfirmButton;
     private long mRowId;
+
     private OnFragmentInteractionListener mListener;
 
     public TaskEditFragment() {
@@ -65,7 +78,8 @@ public class TaskEditFragment extends Fragment implements
         if (arguments != null) {
             mRowId = arguments.getLong(TaskProvider.COLUMN_ROWID);
         }
-
+        // If we're restoring state from a previous activity, restore the
+        // previous date as well, otherwise use now
         if (savedInstanceState != null
                 && savedInstanceState.containsKey(CALENDAR)) {
             mCalendar = (Calendar) savedInstanceState.getSerializable(CALENDAR);
@@ -88,8 +102,8 @@ public class TaskEditFragment extends Fragment implements
         View v = inflater.inflate(R.layout.fragment_task_edit, container, false);
         mTitleText = (EditText) v.findViewById(R.id.title);
         mBodyText = (EditText) v.findViewById(R.id.body);
-        mDateButton = (Button) v.findViewById(R.id.reminder_date);
-        mTimeButton = (Button) v.findViewById(R.id.reminder_time);
+        mDateButton = (Button) v.findViewById(R.id.task_date);
+        mTimeButton = (Button) v.findViewById(R.id.task_time);
         mConfirmButton = (Button) v.findViewById(R.id.confirm);
 
         mDateButton.setOnClickListener(new View.OnClickListener() {
@@ -118,10 +132,13 @@ public class TaskEditFragment extends Fragment implements
                 values.put(TaskProvider.COLUMN_DATE_TIME,
                         mCalendar.getTimeInMillis());
                 if (mRowId == 0) {
+                    // add new task
                     Uri itemUri = getActivity().getContentResolver().insert(
                             TaskProvider.CONTENT_URI, values);
+
                     mRowId = ContentUris.parseId(itemUri);
                 } else {
+                    // edit task
                     int count = getActivity().getContentResolver().update(
                             ContentUris.withAppendedId(
                                     TaskProvider.CONTENT_URI, mRowId),
@@ -131,15 +148,74 @@ public class TaskEditFragment extends Fragment implements
                                 + mRowId);
                 }
                 Toast.makeText(getActivity(),
-                        getString(R.string.task_saved_message),
+                        getString(R.string.toast_task_saved),
                         Toast.LENGTH_SHORT).show();
-                getActivity().finish();
+                mListener.onFinishEditing();
             }
         });
 
+        setHasOptionsMenu(true);
 
+        // load data
+        if (mRowId == 0) {
+            // This is a new task - add defaults from preferences if set.
+
+            // TODO
+//            SharedPreferences prefs = PreferenceManager
+//                    .getDefaultSharedPreferences(getActivity());
+//            String defaultTitleKey = getString(R.string.pref_task_title_key);
+//            String defaultTimeKey = getString(R.string.pref_default_time_from_now_key);
+//
+//            String defaultTitle = prefs.getString(defaultTitleKey, null);
+//            String defaultTime = prefs.getString(defaultTimeKey, null);
+//
+//            if (defaultTitle != null)
+//                mTitleText.setText(defaultTitle);
+//
+//            if (defaultTime != null && defaultTime.length()>0 )
+//                mCalendar.add(Calendar.MINUTE, Integer.parseInt(defaultTime));
+
+            updateButtons();
+
+        } else {
+
+            // Fire off a background loader to retrieve the data from the
+            // database
+            getLoaderManager().initLoader(0, null, this);
+
+        }
         return v;
+    }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_task_edit, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // delete task button
+            case R.id.action_delete:
+                if (mRowId != 0) {
+                    // if editing already existing task -> delete task
+                    int count = getActivity().getContentResolver().delete(
+                            ContentUris.withAppendedId(TaskProvider.CONTENT_URI,
+                                    mRowId), null, null);
+
+                    if (count == 1)
+                        Toast.makeText(getActivity(), R.string.toast_task_deleted,
+                                Toast.LENGTH_SHORT).show();
+                    else
+                        throw new IllegalStateException("Unable to delete " + mRowId);
+                }
+
+                // let the listener know that the editing is finished
+                mListener.onFinishEditing();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showDatePicker() {
@@ -207,19 +283,54 @@ public class TaskEditFragment extends Fragment implements
         mListener = null;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        return new CursorLoader(getActivity(), ContentUris.withAppendedId(
+                TaskProvider.CONTENT_URI, mRowId),
+                null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor reminder) {
+        // Close this fragment down if the item we're editing was deleted
+        if (reminder.getCount() == 0) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    TaskEditFragment.this.mListener.onFinishEditing();
+                }
+            });
+            return;
+        }
+
+        mTitleText.setText(reminder.getString(reminder
+                .getColumnIndexOrThrow(TaskProvider.COLUMN_TITLE)));
+        mBodyText.setText(reminder.getString(reminder
+                .getColumnIndexOrThrow(TaskProvider.COLUMN_BODY)));
+
+        // Get the date from the database
+        Long dateInMillis = reminder.getLong(reminder
+                .getColumnIndexOrThrow(TaskProvider.COLUMN_DATE_TIME));
+        Date date = new Date(dateInMillis);
+        mCalendar.setTime(date);
+
+        updateButtons();
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> arg0) {
+        // nothing to reset for this fragment
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onFinishEditing();
     }
 
 }

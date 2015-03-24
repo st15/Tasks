@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
-import com.lili.tasks.TaskProvider;
+import com.lili.tasks.data.TaskProvider;
 
 import java.util.Calendar;
 

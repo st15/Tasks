@@ -29,8 +29,8 @@
         </activity>
 
         <provider
-            android:name=".TaskProvider"
-            android:authorities="com.lili.tasks.TaskProvider"
+            android:name=".data.TaskProvider"
+            android:authorities="com.lili.tasks.data.TaskProvider"
             android:exported="false" />
 
         <receiver

@@ -6,6 +6,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.lili.tasks.data.TaskProvider;
+
 
 public class MainListActivity extends ActionBarActivity
         implements TaskListFragment.OnFragmentInteractionListener {
@@ -37,7 +39,7 @@ public class MainListActivity extends ActionBarActivity
     }
 
     @Override
-    public void onFragmentInteraction(Long id) {
+    public void onListItemClick(long id) {
         editTask(id);
     }
 
