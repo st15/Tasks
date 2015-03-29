@@ -42,9 +42,7 @@ public class TaskProvider extends ContentProvider {
     private static final int ITEM_TASK = 1;
     // Content Provider Uri and Authority
     public static String AUTHORITY = "com.lili.tasks.data.TaskProvider";
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
-            + "/task");
-    
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/task");
     private static final UriMatcher sURIMatcher = buildUriMatcher();
 
     private SQLiteDatabase mDb;
