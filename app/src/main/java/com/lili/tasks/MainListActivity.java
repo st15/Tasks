@@ -34,15 +34,15 @@ public class MainListActivity extends ActionBarActivity
             case R.id.action_insert:
                 editTask(0);
                 return true;
+            case R.id.menu_settings:
+                Intent i = new Intent(this, TaskPreferences.class);
+                startActivity(i);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onListItemClick(long id) {
-        editTask(id);
-    }
-
     public void editTask(long id) {
         Intent i = new Intent(this, TaskEditActivity.class);
         i.putExtra(TaskProvider.COLUMN_ROWID, id);

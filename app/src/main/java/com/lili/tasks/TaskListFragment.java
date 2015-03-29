@@ -143,7 +143,7 @@ public class TaskListFragment extends Fragment
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onListItemClick(id);
+            mListener.editTask(id);
         }
     }
 
@@ -186,7 +186,7 @@ public class TaskListFragment extends Fragment
      * activity.
      */
     public interface OnFragmentInteractionListener {
-        public void onListItemClick(long id);
+        public void editTask(long id);
     }
 
 }

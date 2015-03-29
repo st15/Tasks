@@ -28,6 +28,10 @@
                 android:value="com.lili.tasks.MainListActivity" />
         </activity>
 
+        <activity
+            android:name=".TaskPreferences"
+            android:label="@string/app_name" />
+
         <provider
             android:name=".data.TaskProvider"
             android:authorities="com.lili.tasks.data.TaskProvider"

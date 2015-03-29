@@ -5,10 +5,12 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -28,6 +30,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.lili.tasks.data.TaskProvider;
+import com.lili.tasks.reminder.ReminderManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -151,6 +154,9 @@ public class TaskEditFragment extends Fragment implements
                         getString(R.string.toast_task_saved),
                         Toast.LENGTH_SHORT).show();
                 mListener.onFinishEditing();
+
+                new ReminderManager(getActivity()).setReminder(mRowId,
+                        mCalendar);
             }
         });
 
@@ -160,20 +166,19 @@ public class TaskEditFragment extends Fragment implements
         if (mRowId == 0) {
             // This is a new task - add defaults from preferences if set.
 
-            // TODO
-//            SharedPreferences prefs = PreferenceManager
-//                    .getDefaultSharedPreferences(getActivity());
-//            String defaultTitleKey = getString(R.string.pref_task_title_key);
-//            String defaultTimeKey = getString(R.string.pref_default_time_from_now_key);
-//
-//            String defaultTitle = prefs.getString(defaultTitleKey, null);
-//            String defaultTime = prefs.getString(defaultTimeKey, null);
-//
-//            if (defaultTitle != null)
-//                mTitleText.setText(defaultTitle);
-//
-//            if (defaultTime != null && defaultTime.length()>0 )
-//                mCalendar.add(Calendar.MINUTE, Integer.parseInt(defaultTime));
+            SharedPreferences prefs = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            String defaultTitleKey = getString(R.string.pref_task_title_key);
+            String defaultTimeKey = getString(R.string.pref_default_time_from_now_key);
+
+            String defaultTitle = prefs.getString(defaultTitleKey, null);
+            String defaultTime = prefs.getString(defaultTimeKey, null);
+
+            if (defaultTitle != null)
+                mTitleText.setText(defaultTitle);
+
+            if (defaultTime != null && defaultTime.length() > 0)
+                mCalendar.add(Calendar.MINUTE, Integer.parseInt(defaultTime));
 
             updateButtons();
 

@@ -40,11 +40,13 @@ public class TaskProvider extends ContentProvider {
     // UriMatcher stuff
     private static final int LIST_TASK = 0;
     private static final int ITEM_TASK = 1;
-    private static final UriMatcher sURIMatcher = buildUriMatcher();
     // Content Provider Uri and Authority
     public static String AUTHORITY = "com.lili.tasks.data.TaskProvider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/task");
+    
+    private static final UriMatcher sURIMatcher = buildUriMatcher();
+
     private SQLiteDatabase mDb;
 
     /**
@@ -62,6 +64,7 @@ public class TaskProvider extends ContentProvider {
 
     /**
      * Initialize the content provider on startup.
+     *
      * @return true if the provider was successfully loaded, false otherwise
      */
     @Override
@@ -71,7 +74,6 @@ public class TaskProvider extends ContentProvider {
     }
 
     /**
-     *
      * @param uri the URI to query.
      * @return a MIME type string, or {@code null} if there is no type.
      */
@@ -88,7 +90,6 @@ public class TaskProvider extends ContentProvider {
     }
 
     /**
-     *
      * @param uri           The URI to query. This will be the full URI sent by the client;
      *                      if the client is requesting a specific record, the URI will end in a record number
      *                      that the implementation should parse and add to a WHERE or HAVING clause, specifying
@@ -150,7 +151,6 @@ public class TaskProvider extends ContentProvider {
     }
 
     /**
-     *
      * @param uri           The full URI to query, including a row ID (if a specific record is requested).
      * @param selection     Ignored.
      * @param selectionArgs Ignored.
@@ -168,7 +168,6 @@ public class TaskProvider extends ContentProvider {
     }
 
     /**
-     *
      * @param uri           The URI to query. This can potentially have a record ID if this
      *                      is an update request for a specific record.
      * @param values        A set of column_name/value pairs to update in the database.
